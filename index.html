@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beetfolio — 資産ダッシュボード</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="aurora-bg"></div>
+
+  <div class="app">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true">
+            <path d="M16 2 L28 9 V23 L16 30 L4 23 V9 Z" fill="none" stroke="url(#bg1)" stroke-width="2"/>
+            <circle cx="16" cy="16" r="5" fill="url(#bg1)"/>
+            <defs>
+              <linearGradient id="bg1" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0" stop-color="#a78bfa"/>
+                <stop offset="0.5" stop-color="#ff4d9d"/>
+                <stop offset="1" stop-color="#2de2e6"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="brand-name">BEETFOLIO</span>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item active" href="#"><span class="ni-icon">◰</span> ダッシュボード</a>
+        <a class="nav-item" href="#"><span class="ni-icon">◈</span> 総資産</a>
+        <a class="nav-item" href="#"><span class="ni-icon">₿</span> 暗号資産</a>
+        <a class="nav-item" href="#"><span class="ni-icon">▤</span> 株式・投信</a>
+        <a class="nav-item" href="#"><span class="ni-icon">▦</span> 銀行・現金</a>
+        <a class="nav-item" href="#"><span class="ni-icon">◐</span> 分析</a>
+        <a class="nav-item" href="#"><span class="ni-icon">⇄</span> 入出金</a>
+        <a class="nav-item" href="#"><span class="ni-icon">⚙</span> 設定</a>
+      </nav>
+
+      <div class="upgrade-card">
+        <div class="uc-title">API連携を追加</div>
+        <div class="uc-sub">取引所・証券・銀行口座を<br/>自動で同期。</div>
+        <button class="uc-btn">+ 口座を接続</button>
+      </div>
+
+      <div class="sys-status">
+        <div class="ss-head">
+          <span>同期ステータス</span>
+          <span class="dot ok"></span>
+        </div>
+        <div class="ss-sub">最終同期 10:30 • 全口座 正常</div>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="welcome">
+          <h1>おかえりなさい、Trader</h1>
+          <p>今日のあなたの資産状況です。</p>
+        </div>
+        <div class="topbar-right">
+          <div class="market-status">
+            <span class="dot ok"></span>
+            <div>
+              <div class="ms-label">マーケット稼働中</div>
+              <div class="ms-time" id="clock">2026/06/19 • 10:30:45 (JST)</div>
+            </div>
+          </div>
+          <button class="icon-btn" aria-label="検索">⌕</button>
+          <button class="icon-btn badge" aria-label="通知">◔<span class="badge-dot">3</span></button>
+          <div class="profile">
+            <div class="avatar">TK</div>
+            <div class="pf-name">Trader K. <span class="caret">▾</span></div>
+          </div>
+        </div>
+      </header>
+
+      <!-- KPI row -->
+      <section class="kpi-row" id="kpiRow"></section>
+
+      <!-- Chart + side -->
+      <section class="grid-2">
+        <div class="panel chart-panel">
+          <div class="panel-head">
+            <div class="ph-left">
+              <span class="asset-icon">◈</span>
+              <div>
+                <div class="ph-title">総資産推移</div>
+                <div class="ph-sub">Net Worth</div>
+              </div>
+              <div class="ph-value" id="netNow">¥0</div>
+              <span class="pill up" id="netChange">+0.0%</span>
+            </div>
+            <div class="tf-toggle" id="tfToggle">
+              <button data-tf="1W">1W</button>
+              <button data-tf="1M" class="active">1M</button>
+              <button data-tf="3M">3M</button>
+              <button data-tf="6M">6M</button>
+              <button data-tf="1Y">1Y</button>
+              <button data-tf="ALL">ALL</button>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <svg id="netChart" class="net-chart" preserveAspectRatio="none"></svg>
+            <div class="chart-tooltip" id="chartTip" hidden></div>
+          </div>
+        </div>
+
+        <div class="panel accounts-panel">
+          <div class="panel-head">
+            <div class="ph-title">接続口座</div>
+            <a class="link" href="#">すべて</a>
+          </div>
+          <div class="accounts" id="accounts"></div>
+          <button class="add-bot">+ 口座を追加</button>
+        </div>
+      </section>
+
+      <!-- Bottom row -->
+      <section class="grid-3">
+        <div class="panel">
+          <div class="panel-head"><div class="ph-title">資産配分</div></div>
+          <div class="allocation">
+            <div class="donut-wrap">
+              <svg id="donut" viewBox="0 0 180 180"></svg>
+              <div class="donut-center">
+                <div class="dc-label">総資産</div>
+                <div class="dc-value" id="donutTotal">¥0</div>
+              </div>
+            </div>
+            <ul class="legend" id="legend"></ul>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="ph-title">主要保有</div>
+            <a class="link" href="#">すべて</a>
+          </div>
+          <div class="holdings" id="holdings"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="ph-title">最近の取引</div>
+            <a class="link" href="#">すべて</a>
+          </div>
+          <div class="trades" id="trades"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
