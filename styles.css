@@ -587,3 +587,58 @@ body {
   .form-grid { grid-template-columns: 1fr; }
   .table { overflow-x: auto; }
 }
+
+/* ============================================================
+   LIGHT THEME (白基調) — トークン上書き
+   ============================================================ */
+html[data-theme="light"] {
+  --bg: #eceef7;
+  --bg-2: #ffffff;
+  --panel: rgba(255, 255, 255, 0.80);
+  --panel-2: rgba(255, 255, 255, 0.62);
+  --panel-solid: #ffffff;
+  --border: rgba(30, 34, 72, 0.10);
+  --border-strong: rgba(30, 34, 72, 0.18);
+  --hairline: rgba(255, 255, 255, 0.9);
+  --text: #1b1e36;
+  --muted: #5b6184;
+  --muted-2: #8990b0;
+  --violet: #7c5cff;
+  --magenta: #f5318f;
+  --cyan: #129fb4;
+  --gold: #bd8c39;
+  --gold-2: #a3782c;
+  --green: #12b070;
+  --red: #ee3f66;
+  --grad: linear-gradient(115deg, #7c5cff 0%, #f5318f 50%, #16bcc6 100%);
+  --grad-gold: linear-gradient(120deg, #d6b061 0%, #a3782c 100%);
+  --grad-soft: linear-gradient(135deg, rgba(124,92,255,.13), rgba(18,159,180,.09));
+  --shadow: 0 22px 46px -26px rgba(40, 44, 92, 0.30);
+}
+html[data-theme="light"] body { letter-spacing: 0; }
+html[data-theme="light"] .aurora-bg {
+  background:
+    radial-gradient(820px 620px at 12% -5%, rgba(124,92,255,.14), transparent 60%),
+    radial-gradient(760px 600px at 96% 6%, rgba(18,159,180,.11), transparent 55%),
+    radial-gradient(720px 520px at 58% 112%, rgba(245,49,143,.09), transparent 55%),
+    radial-gradient(600px 500px at 80% 70%, rgba(189,140,57,.06), transparent 60%),
+    var(--bg);
+}
+html[data-theme="light"] .grain { opacity: .02; }
+html[data-theme="light"] .sidebar {
+  background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.46));
+}
+/* subtle gray fills read better a touch darker on white */
+html[data-theme="light"] .barrow-track { background: rgba(30,34,72,.08); }
+html[data-theme="light"] #donut circle:first-child { stroke: rgba(30,34,72,.08); }
+html[data-theme="light"] .field input,
+html[data-theme="light"] .field select,
+html[data-theme="light"] .field textarea,
+html[data-theme="light"] .search-input,
+html[data-theme="light"] .mini-select { background: rgba(30,34,72,.04); }
+
+/* gradient-text needs dark stops on a light background */
+html[data-theme="light"] .brand-name { background: linear-gradient(100deg, #2a2350, #7c5cff 45%, #bd8c39); -webkit-background-clip: text; background-clip: text; }
+html[data-theme="light"] .welcome h1 { background: linear-gradient(100deg, #1b1e36, #5b3fb0); -webkit-background-clip: text; background-clip: text; }
+html[data-theme="light"] .ph-value { background: linear-gradient(100deg, #1b1e36, #6a4ff0 55%, #1296a8); -webkit-background-clip: text; background-clip: text; }
+html[data-theme="light"] .dc-value { background: linear-gradient(100deg, #1b1e36, #6a4ff0); -webkit-background-clip: text; background-clip: text; }

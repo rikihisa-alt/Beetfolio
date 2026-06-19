@@ -560,6 +560,16 @@
   });
 
   // topbar buttons
+  function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem("beetfolio:theme", t); } catch (e) {}
+    const b = document.getElementById("themeBtn");
+    if (b) { b.textContent = t === "light" ? "☾" : "☀"; b.title = t === "light" ? "ダークに切替" : "ライトに切替"; }
+    paint(false);
+  }
+  document.getElementById("themeBtn").onclick = () =>
+    applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+
   document.getElementById("connectBtn").onclick = () => openConnectFlow();
   document.getElementById("syncBtn").onclick = () => { Store.refreshPrices(); toast("価格を更新しました"); };
   document.getElementById("searchBtn").onclick = openSearch;
@@ -682,6 +692,11 @@
   window.addEventListener("resize", () => { if (document.getElementById("netChart")) drawNetChart(); });
 
   // boot
+  (function initThemeIcon() {
+    const t = document.documentElement.dataset.theme || "light";
+    const b = document.getElementById("themeBtn");
+    if (b) { b.textContent = t === "light" ? "☾" : "☀"; b.title = t === "light" ? "ダークに切替" : "ライトに切替"; }
+  })();
   syncTopbar();
   render();
   tickClock(); setInterval(tickClock, 1000);
