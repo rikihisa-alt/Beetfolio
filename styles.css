@@ -90,7 +90,8 @@ body {
   backdrop-filter: blur(12px);
 }
 
-.brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px; }
+.brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px; cursor: pointer; border-radius: 12px; transition: background .15s ease; }
+.brand:hover { background: rgba(140,150,190,.07); }
 .brand-mark {
   width: 38px; height: 38px; border-radius: 11px;
   display: grid; place-items: center;
@@ -628,6 +629,10 @@ html[data-theme="light"] .grain { opacity: .02; }
 html[data-theme="light"] .sidebar {
   background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.46));
 }
+/* 選択中ナビ: 白文字をやめ、濃い藤色で可読性を確保 */
+html[data-theme="light"] .nav-item.active { color: #2c2570; font-weight: 600; }
+html[data-theme="light"] .nav-item.active .ni-icon { color: #6a4ff0; }
+html[data-theme="light"] .nav-item:hover { color: var(--text); }
 /* subtle gray fills read better a touch darker on white */
 html[data-theme="light"] .barrow-track { background: rgba(30,34,72,.08); }
 html[data-theme="light"] #donut circle:first-child { stroke: rgba(30,34,72,.08); }
