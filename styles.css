@@ -92,16 +92,12 @@ body {
 
 .brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px; cursor: pointer; border-radius: 12px; transition: background .15s ease; }
 .brand:hover { background: rgba(140,150,190,.07); }
-.brand-mark {
-  width: 38px; height: 38px; border-radius: 11px;
-  display: grid; place-items: center;
-  background: var(--grad-soft);
-  border: 1px solid var(--border-strong);
-}
+.brand-mark { display: grid; place-items: center; line-height: 0; flex: none; }
+.brand-mark svg { filter: drop-shadow(0 4px 10px rgba(124,58,237,.35)); }
 .brand-name {
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 700; letter-spacing: 2px; font-size: 18px;
-  background: linear-gradient(100deg, #fff 0%, #d9cffb 40%, #f4e0b4 100%);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 700; letter-spacing: -0.01em; font-size: 21px;
+  background: linear-gradient(100deg, #fff 0%, #e3d9ff 55%, #f4e0b4 100%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
 
@@ -643,7 +639,7 @@ html[data-theme="light"] .search-input,
 html[data-theme="light"] .mini-select { background: rgba(30,34,72,.04); }
 
 /* gradient-text needs dark stops on a light background */
-html[data-theme="light"] .brand-name { background: linear-gradient(100deg, #2a2350, #7c5cff 45%, #bd8c39); -webkit-background-clip: text; background-clip: text; }
+html[data-theme="light"] .brand-name { background: linear-gradient(100deg, #2e1f6b, #6d28d9); -webkit-background-clip: text; background-clip: text; }
 html[data-theme="light"] .welcome h1 { background: linear-gradient(100deg, #1b1e36, #5b3fb0); -webkit-background-clip: text; background-clip: text; }
 html[data-theme="light"] .ph-value { background: linear-gradient(100deg, #1b1e36, #6a4ff0 55%, #1296a8); -webkit-background-clip: text; background-clip: text; }
 html[data-theme="light"] .dc-value { background: linear-gradient(100deg, #1b1e36, #6a4ff0); -webkit-background-clip: text; background-clip: text; }
