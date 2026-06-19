@@ -6,6 +6,45 @@
   const { fmtJPY, fmtSigned, fmtSignedJPY, fmtQty, escapeHtml, toast, openForm, confirmDialog, popover } = UI;
 
   const view = document.getElementById("view");
+
+  /* ---------- entrance animations (count-up + chart draw-in) ---------- */
+  let shouldAnimate = true;
+  const FMT = {
+    jpy: fmtJPY, sjpy: fmtSignedJPY,
+    pct: (v) => v.toFixed(1) + "%",
+    plain: (v) => Math.round(v).toLocaleString("ja-JP"),
+  };
+  function countUp(el, to, fmt) {
+    if (!el) return;
+    const f = FMT[fmt] || FMT.plain;
+    if (!shouldAnimate) { el.textContent = f(to); return; }
+    const dur = 900; let start = null;
+    function step(ts) {
+      if (start === null) start = ts;
+      const p = Math.min(1, (ts - start) / dur);
+      const e = 1 - Math.pow(1 - p, 3);
+      el.textContent = f(to * e);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function drawInLine(svg) {
+    if (!svg || !shouldAnimate) return;
+    const p = svg.querySelector("#netLinePath"); if (!p) return;
+    const len = p.getTotalLength();
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    p.getBoundingClientRect();
+    p.style.transition = "stroke-dashoffset 1.15s cubic-bezier(.4,0,.2,1)";
+    requestAnimationFrame(() => { p.style.strokeDashoffset = "0"; });
+    const a = svg.querySelector("#netArea");
+    if (a) { a.style.opacity = "0"; a.style.transition = "opacity 1.2s ease"; requestAnimationFrame(() => a.style.opacity = "1"); }
+  }
+  function enhance() {
+    view.querySelectorAll("[data-count]").forEach((el) => countUp(el, +el.dataset.count, el.dataset.fmt));
+    const d = document.getElementById("donut");
+    if (d && shouldAnimate) { d.classList.remove("spin-in"); void d.offsetWidth; d.classList.add("spin-in"); }
+  }
+
   const PAGE = {
     dashboard:   { title: "ダッシュボード", sub: "今日のあなたの資産状況です。" },
     networth:    { title: "総資産", sub: "純資産の推移と内訳。" },
@@ -45,9 +84,10 @@
     const svg = document.getElementById("netChart"); if (!svg) return;
     const series = Store.netWorthSeries(currentTF);
     Charts.lineChart(svg, series, tfLabel);
+    drawInLine(svg);
     const now = series[series.length - 1].v, first = series[0].v;
     const chg = first ? ((now - first) / first) * 100 : 0;
-    document.getElementById("netNow").textContent = fmtJPY(now);
+    countUp(document.getElementById("netNow"), now, "jpy");
     const pill = document.getElementById("netChange");
     pill.textContent = fmtSigned(chg); pill.className = "pill " + (chg >= 0 ? "up" : "down");
   }
@@ -67,7 +107,7 @@
       <div class="allocation">
         <div class="donut-wrap">
           <svg id="donut" viewBox="0 0 180 180"></svg>
-          <div class="donut-center"><div class="dc-label">総資産</div><div class="dc-value">${fmtJPY(Store.totalValue())}</div></div>
+          <div class="donut-center"><div class="dc-label">総資産</div><div class="dc-value" data-count="${Store.totalValue()}" data-fmt="jpy">${fmtJPY(Store.totalValue())}</div></div>
         </div>
         <ul class="legend">${segs.map((a) => `<li>
           <span class="lg-swatch" style="background:${a.color}"></span>
@@ -103,16 +143,16 @@
   function pageDashboard() {
     const k = Store.kpis();
     const cards = [
-      { label: "総資産", glyph: "◈", value: fmtJPY(k.total), d: k.monthChangePct, up: k.monthChangePct >= 0 },
-      { label: "今月の損益", glyph: "↗", value: fmtSignedJPY(k.monthChange), d: k.monthChangePct, up: k.monthChange >= 0 },
-      { label: "評価損益", glyph: "▤", value: fmtSignedJPY(k.unrealizedPL), d: k.unrealizedPLPct, up: k.unrealizedPL >= 0 },
-      { label: "現金比率", glyph: "▦", value: k.cashRatio.toFixed(1) + "%", d: 0, up: true, flat: true },
+      { label: "総資産", glyph: "◈", num: k.total, fmt: "jpy", d: k.monthChangePct, up: k.monthChangePct >= 0 },
+      { label: "今月の損益", glyph: "↗", num: k.monthChange, fmt: "sjpy", d: k.monthChangePct, up: k.monthChange >= 0 },
+      { label: "評価損益", glyph: "▤", num: k.unrealizedPL, fmt: "sjpy", d: k.unrealizedPLPct, up: k.unrealizedPL >= 0 },
+      { label: "現金比率", glyph: "▦", num: k.cashRatio, fmt: "pct", d: 0, up: true, flat: true },
     ];
     view.innerHTML = `
       <section class="kpi-row">${cards.map((c, i) => `
         <div class="kpi">
           <div class="kpi-head"><span class="kpi-label">${c.label}</span><span class="kpi-glyph">${c.glyph}</span></div>
-          <div class="kpi-value">${c.value}</div>
+          <div class="kpi-value" data-count="${c.num}" data-fmt="${c.fmt}">${FMT[c.fmt](c.num)}</div>
           <div class="kpi-delta ${c.up ? "up" : "down"}">${c.flat ? "現預金の割合" : fmtSigned(c.d) + " 今月"}</div>
           ${Charts.sparkline(Charts.seededSpark(7 + i * 13), { up: c.up, id: "kg" + i })}
         </div>`).join("")}
@@ -296,7 +336,7 @@
       </section>`;
     drawDonut();
     const svg = document.getElementById("netChart");
-    if (svg) Charts.lineChart(svg, Store.netWorthSeries("6M"), tfLabel);
+    if (svg) { Charts.lineChart(svg, Store.netWorthSeries("6M"), tfLabel); drawInLine(svg); }
   }
 
   function pageTransactions() {
@@ -446,6 +486,46 @@
     }, { okLabel: "記録" });
   }
 
+  /* ---------- API連携（接続フロー・スキャフォルド） ---------- */
+  const PROVIDERS = [
+    { name: "bitFlyer", type: "crypto", color: "#f0a020", logo: "₿" },
+    { name: "Coincheck", type: "crypto", color: "#11a4d8", logo: "C" },
+    { name: "Binance", type: "crypto", color: "#f3ba2f", logo: "◆" },
+    { name: "GMOコイン", type: "crypto", color: "#0a8f5b", logo: "G" },
+    { name: "SBI証券", type: "securities", color: "#3b82f6", logo: "▤" },
+    { name: "楽天証券", type: "securities", color: "#bf2d2d", logo: "▤" },
+    { name: "マネックス証券", type: "securities", color: "#1463b6", logo: "▤" },
+    { name: "楽天銀行", type: "bank", color: "#bf2d2d", logo: "▦" },
+    { name: "住信SBIネット銀行", type: "bank", color: "#10b981", logo: "▦" },
+    { name: "三菱UFJ銀行", type: "bank", color: "#e60012", logo: "▦" },
+  ];
+
+  function openConnectFlow() {
+    UI.openModal("口座を接続", `
+      <div class="connect-note">APIキーは<b>読み取り専用</b>を推奨します。このデモ環境では<b>キーは保存されず</b>、口座の枠だけが作成されます。実データの自動同期は今後のAPI連携で対応します。</div>
+      <div class="provider-grid">${PROVIDERS.map((p, i) => `
+        <div class="provider" data-pi="${i}">
+          <span class="hold-logo sm" style="background:${p.color}22;color:${p.color}">${escapeHtml(p.logo)}</span>
+          <span><b>${escapeHtml(p.name)}</b><small>${Store.TYPE_LABEL[p.type]}</small></span>
+        </div>`).join("")}</div>
+      <a class="connect-manual" data-manual>手動で口座を追加 →</a>`,
+      { wide: true, onMount(ov) {
+        ov.querySelectorAll(".provider").forEach((el) => el.onclick = () => {
+          const p = PROVIDERS[+el.dataset.pi]; UI.closeModal(); openConnectForm(p);
+        });
+        ov.querySelector("[data-manual]").onclick = () => { UI.closeModal(); openAccountForm(); };
+      } });
+  }
+  function openConnectForm(p) {
+    openForm(`${p.name} と接続`, [
+      { name: "apiKey", label: "APIキー（読み取り専用）", required: true, placeholder: "例: 8f2c…" },
+      { name: "apiSecret", label: "APIシークレット", type: "password", placeholder: "••••••••", help: "デモ環境では保存されません" },
+    ], {}, () => {
+      Store.addAccount({ name: p.name, type: p.type, color: p.color, logo: p.logo });
+      toast(`${p.name} を接続しました（デモ）`);
+    }, { okLabel: "接続" });
+  }
+
   /* ============================================================
      GLOBAL INTERACTIONS (event delegation)
      ============================================================ */
@@ -480,7 +560,7 @@
   });
 
   // topbar buttons
-  document.getElementById("connectBtn").onclick = () => openAccountForm();
+  document.getElementById("connectBtn").onclick = () => openConnectFlow();
   document.getElementById("syncBtn").onclick = () => { Store.refreshPrices(); toast("価格を更新しました"); };
   document.getElementById("searchBtn").onclick = openSearch;
   document.getElementById("notifBtn").onclick = (e) => openNotifications(e.currentTarget);
@@ -559,6 +639,13 @@
   };
 
   let currentRoute = "dashboard";
+  function paint(animate) {
+    shouldAnimate = animate;
+    view.classList.toggle("animate-in", animate);
+    ROUTES[currentRoute]();
+    enhance();
+    shouldAnimate = false;
+  }
   function render() {
     const route = (location.hash.slice(1) || "dashboard");
     currentRoute = ROUTES[route] ? route : "dashboard";
@@ -567,12 +654,12 @@
     document.getElementById("pageTitle").textContent = meta.title;
     document.getElementById("pageSub").textContent = meta.sub;
     view.scrollTop = 0;
-    ROUTES[currentRoute]();
+    paint(true);
   }
 
-  // re-render current page on data change
+  // re-render current page on data change (no entrance animation)
   Store.subscribe(() => {
-    ROUTES[currentRoute]();
+    paint(false);
     syncTopbar();
   });
 

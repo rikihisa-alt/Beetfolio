@@ -60,8 +60,8 @@
         </linearGradient>
       </defs>
       ${grid}
-      <path d="${area}" fill="url(#netGrad)"/>
-      <path d="${line}" fill="none" stroke="url(#netLine)" stroke-width="2.5" stroke-linejoin="round"/>
+      <path id="netArea" d="${area}" fill="url(#netGrad)"/>
+      <path id="netLinePath" d="${line}" fill="none" stroke="url(#netLine)" stroke-width="2.5" stroke-linejoin="round"/>
       <circle id="dot" r="4.5" fill="#fff" stroke="#ff4d9d" stroke-width="2" opacity="0"/>
       <line id="guide" stroke="rgba(255,255,255,.15)" opacity="0"/>`;
 
